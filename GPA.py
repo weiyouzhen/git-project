@@ -27,7 +27,7 @@ archive_gpa,submit_gpa=0.0,0.0
 while True:
     print("작업을 선택하세요.")
     print("1.입력")
-    print("2.산산")
+    print("2.계산")
 
     user_value=input()
     value=int(user_value)
