@@ -27,7 +27,7 @@ archive_gpa,submit_gpa=0.0,0.0
 while True:
     print("작업을 선택하세요.")
     print("1.입력")
-    print("2.출력")
+    print("2.계")
 
     user_value=input()
     value=int(user_value)
@@ -46,6 +46,7 @@ while True:
                 submit_gpa +=credit*gpa
             archive_credit+=credit
             archive_gpa+=credit*gpa
+            print("입력되었습니다.")
         #출력
         case 2:
             submit_gpa/=submit_credit
@@ -53,4 +54,5 @@ while True:
 
             print("제출용:"+str(submit_credit)+"학점(gpa:"+str(submit_gpa)+")")
             print("열람용:"+str(archive_credit)+"학점(gpa:"+str(round(archive_gpa,2))+")")
+            print("프로그램을 종료합니다")
             break
