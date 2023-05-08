@@ -1,115 +1,122 @@
-# 과목 코드와 과목명을 저장하는 사전
+# 과목 코드와 과목명을 사전으로 관리
 subject_dict = {'12345': '오픈소스SW와 파이썬 프로그래밍', '23456': '기초컴퓨터프로그래밍', '34567': '글쓰기'}
 
-# 수강목록을 저장하는 리스트
-course_list = []
+# 수강목록 클래스 정의
+class CourseList:
+    def __init__(self):
+        self.courses = []
 
-# 학점을 계산하는 함수
-def calculate_GPA(courses, include_F):
-    total_credit = 0
-    total_grade = 0
-    for course in courses:
-        if course[2] == 'F' and not include_F:
-            continue
-        credit = course[1]
-        grade = course[2]
-        if grade == 'A+':
-            total_grade += credit * 4.5
-        elif grade == 'A':
-            total_grade += credit * 4.0
-        elif grade == 'B+':
-            total_grade += credit * 3.5
-        elif grade == 'B':
-            total_grade += credit * 3.0
-        elif grade == 'C+':
-            total_grade += credit * 2.5
-        elif grade == 'C':
-            total_grade += credit * 2.0
-        elif grade == 'D+':
-            total_grade += credit * 1.5
-        elif grade == 'D':
-            total_grade += credit * 1.0
-        elif grade == 'F':
-            total_grade += credit * 0.0
-        total_credit += credit
-    GPA = total_grade / total_credit
-    return (total_credit, round(GPA, 2))
+    def add_course(self, code, credit, grade):
+        self.courses.append((code, credit, grade))
 
-# 입력 작업 함수
-def input_course():
-    while True:
-        input_str = input("과목명과 학점, 평점을 입력하세요 (종료는 q): ")
-        if input_str == 'q':
-            break
-        input_list = input_str.split(',')
-        code = input("과목 코드를 입력하세요: ")
-        name = subject_dict.get(code)
-        if name is None:
-            print("해당하는 과목이 없습니다.")
-            continue
-        credit = int(input_list[1])
-        grade = input_list[2].strip()
-        # 이미 수강한 과목인지 확인
-        for i, course in enumerate(course_list):
+    def get_course_list(self):
+        return self.courses
+
+    def get_course_by_code(self, code):
+        for course in self.courses:
             if course[0] == code:
-                if grade > course[2]:
-                    course_list[i] = (code, credit, grade)
-                break
+                return course
+        return None
+
+    def calculate_total_credit(self, include_f=False):
+        total_credit = 0
+        for course in self.courses:
+            if include_f or course[2] != 'F':
+                total_credit += course[1]
+        return total_credit
+
+    def calculate_gpa(self, include_f=False):
+        total_grade_point = 0
+        total_credit = 0
+        for course in self.courses:
+            if include_f or course[2] != 'F':
+                total_credit += course[1]
+                if course[2] == 'A+':
+                    total_grade_point += 4.5 * course[1]
+                elif course[2] == 'A':
+                    total_grade_point += 4.0 * course[1]
+                elif course[2] == 'B+':
+                    total_grade_point += 3.5 * course[1]
+                elif course[2] == 'B':
+                    total_grade_point += 3.0 * course[1]
+                elif course[2] == 'C+':
+                    total_grade_point += 2.5 * course[1]
+                elif course[2] == 'C':
+                    total_grade_point += 2.0 * course[1]
+                elif course[2] == 'D+':
+                    total_grade_point += 1.5 * course[1]
+                elif course[2] == 'D':
+                    total_grade_point += 1.0 * course[1]
+                else:
+                    total_grade_point += 0.0 * course[1]
+        if total_credit == 0:
+            return 0
         else:
-            course_list.append((code, credit, grade))
+            return total_grade_point / total_credit
+
+# 수강목록 객체 생성
+course_list = CourseList()
+
+# 메뉴 출력 함수 정의
+def print_menu():
+    print("작업을 선택하세요.")
+    print("1. 입력")
+    print("2. 출력")
+    print("3. 조회")
+    print("4. 계산")
+    print("5. 종료")
+
+# 입력 작업 함수 정의
+def input_course():
+    code, credit, grade = input("과목명과 학점, 평점을 입력하세요: ").split(',')
+    if code not in subject_dict:
+        print("잘못된 과목 코드입니다.")
+    else:
+        course_list.add_course(code, int(credit), grade)
         print("입력되었습니다.")
 
-# 출력 작업 함수
-def print_course(include_F):
-    for course in course_list:
-        if course[2] == 'F' and not include_F:
-            continue
-        code = course[0]
-        name = subject_dict.get(code)
-        credit = course[1]
-        grade = course[2]
-        print("[{}] {}학점: {}".format(name, credit, grade))
+# 출력 작업 함수 정의
+def print_course_list(include_grade=True):
+    for course in course_list.get_course_list():
+        if include_grade:
+            print(f"[{subject_dict[course[0]]}] {course[1]}학점: {course[2]}")
+        else:
+            print(f"[{subject_dict[course[0]]}] {course[1]}학점")
 
-# 조회 작업 함수
+# 조회 작업 함수 정의
 def search_course():
-    name = input("과목명을 입력하세요: ")
-    for course in course_list:
-        code = course[0]
-        if subject_dict.get(code) == name:
-            print("[{}] {}학점: {}".format(name, course[1], course[2]))
-            break
+    code = input("과목명을 입력하세요: ")
+    course = course_list.get_course_by_code(code)
+    if course:
+        print(f"[{subject_dict[course[0]]}] {course[1]}학점: {course[2]}")
     else:
         print("해당하는 과목이 없습니다.")
 
-# 계산 작업 함수
-def calculate_GPA_task():
-    submit_credit, submit_GPA = calculate_GPA(course_list, False)
-    view_credit, view_GPA = calculate_GPA(course_list, True)
-    print("제출용: {}학점 (GPA: {})".format(submit_credit, submit_GPA))
-    print("열람용: {}학점 (GPA: {})".format(view_credit, view_GPA))
+# 계산 작업 함수 정의
+def calculate_gpa():
+    total_credit_submit = course_list.calculate_total_credit(include_f=False)
+    total_credit_view = course_list.calculate_total_credit(include_f=True)
+    gpa_submit = course_list.calculate_gpa(include_f=False)
+    gpa_view = course_list.calculate_gpa(include_f=True)
+    print(f"제출용: {total_credit_submit}학점 (GPA: {gpa_submit:.2f})")
+    print(f"열람용: {total_credit_view}학점 (GPA: {gpa_view:.2f})")
 
-# 메인 함수
-def main():
-    while True:
-        print("작업을 선택하세요.")
-        print("1. 입력")
-        print("2. 출력")
-        print("3. 조회")
-        print("4. 계산")
-        print("5. 종료")
-        choice = input()
-        if choice == '1':
-            input_course()
-        elif choice == '2':
-            print_course(False)
-        elif choice == '3':
-            search_course()
-        elif choice == '4':
-            calculate_GPA_task()
-        elif choice == '5':
-            break
-        else:
-            print("잘못된 입력입니다.")
+# 메인 코드
+while True:
+    print_menu()
+    choice = input()
+    if choice == '1':
+        input_course()
+    elif choice == '2':
+        print_course_list()
+    elif choice == '3':
+        search_course()
+    elif choice == '4':
+        calculate_gpa()
+    elif choice == '5':
+        break
+    else:
+        print("잘못된 입력입니다. 다시 입력해주세요.")
 
 
 
